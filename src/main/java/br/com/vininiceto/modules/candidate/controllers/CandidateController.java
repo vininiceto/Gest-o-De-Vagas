@@ -3,6 +3,7 @@ package br.com.vininiceto.modules.candidate.controllers;
 import br.com.vininiceto.exceptions.UserFoundException;
 import br.com.vininiceto.modules.candidate.Repository.CandidateRepository;
 import br.com.vininiceto.modules.candidate.entities.CandidateEntity;
+import br.com.vininiceto.modules.candidate.services.CandidateService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,17 +17,17 @@ public class CandidateController {
 
     @Autowired
     private CandidateRepository repository;
+    @Autowired
+    private CandidateService service;
 
 
     @PostMapping("/register")
-    public ResponseEntity<CandidateEntity> registerCandidate(@Valid @RequestBody CandidateEntity candidateEntity) {
-        this.repository.findByUsernameOrEmail(candidateEntity.getUsername(), candidateEntity.getEmail()).ifPresent((user) -> {
-            throw new UserFoundException();
-        });
-
-
-        return ResponseEntity.status(201).body(repository.saveAndFlush(candidateEntity));
-
+    public ResponseEntity<Object> registerCandidate(@Valid @RequestBody CandidateEntity candidateEntity) {
+       try {
+           return ResponseEntity.ok().body(service.execute(candidateEntity));
+       } catch(Exception e){
+           return ResponseEntity.badRequest().body(e.getMessage());
+       }
     }
 
     @GetMapping("/users/{id}")
